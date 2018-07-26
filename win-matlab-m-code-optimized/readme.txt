@@ -1,0 +1,1 @@
+This code is an optimized version of Ed Olson's initial c code April Tag implementation.
