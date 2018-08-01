@@ -1,14 +1,9 @@
 clc;
 clear;
 close all;
-
-bike  = '../pics/bikesgray.jpg';
-tag   = '../pics/test_tag.png';
-ref   = '../pics/tag_middle.png';
-real  = '../pics/real_life_tag.png';
-real2 = '../pics/real_life_tag2.jpg';
-real3 = '../pics/real_life_tag3.jpg';
-prob  = '../pics/00001.png';
+if(exist('../pics/R','dir') == 0)
+    unzip('../pics/TestData.zip','../pics');
+end
 
 PdataC = csvread('../data/pitchTest.dat');
 RdataC = csvread('../data/rollTest.dat');
