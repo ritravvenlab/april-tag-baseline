@@ -13,8 +13,8 @@ end
 
 %Constants
 TagSize = 0.166;
-Fx = 600;
-Fy = 600;
+Fx = 420;
+Fy = 420;
 
 %Preprocessing to Grayscale
 if(ndims(image) > 2)
