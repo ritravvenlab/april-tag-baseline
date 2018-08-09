@@ -1,9 +1,9 @@
 function bestQuad = optimize_quad_generic(Family, Image, Quad, Steps)
 bestQuad = Quad;
-bestScore = QuadGoodness(Family, Image,Quad);
+best_score = QuadGoodness(Family, Image,Quad);
 
 for StepIdx = 1:length(Steps)
-    improved = 1;
+    improved = 0;
     
     Max_Repeat = 1;
     
@@ -11,13 +11,12 @@ for StepIdx = 1:length(Steps)
         if(improved == 1)
             continue;
         end
-        improved = 0;
         
         for i = 1:4
             CurrentStep = Steps(StepIdx);
             nsteps = 1;
             
-            this_best_Score = bestScore;
+            this_best_score = best_score;
             
             for sx = -nsteps:nsteps
                 for sy = -nsteps:nsteps
@@ -34,9 +33,9 @@ for StepIdx = 1:length(Steps)
                      continue;
                  end
                  
-                 thisScore = QuadGoodness(Family, Image,thisQuad);
+                 this_score = QuadGoodness(Family,Image,thisQuad);
                  
-                 if(this_score > this_best_Score)
+                 if(this_score > this_best_score)
                      this_best_quad = thisQuad;
                      this_best_score = this_score;
                  end
@@ -44,7 +43,7 @@ for StepIdx = 1:length(Steps)
             end
             
             if(this_best_score > best_score)
-                best_quad = this_best_quad;
+                bestQuad = this_best_quad;
                 best_score = this_best_score;
                 improved = 1;
             end
@@ -58,7 +57,7 @@ end
 
 function Goodness = QuadGoodness(AT_Family, Image, Quad)
 white_border = 1;
- dd = 2 * AT_Family.black_border + AT_Family.d; %Find DD
+dd = 2 * AT_Family.black_border + AT_Family.d; %Find DD
 
 xmin = flintmax; xmax = 0;
 ymin = flintmax; ymax = 0;
@@ -100,22 +99,23 @@ ymax = min(size(Image,1),ymax);
 
 W1 = 0; B1 = 0; Wn = 0; Bn = 0;
 
-wsz = dd*white_border;
-bsz = dd*AT_Family.black_border;
+wsz = (2/dd)*white_border;
+bsz = (2/dd)*AT_Family.black_border;
 Hinv = inv(Quad.H33.H);
+%Hinv = Quad.H33.H;
 
 for y = ymin:ymax
-    Hx = Hinv(1,1) * (0.5 + xmin) + Hinv(1,2) + (y + 0.5) + Hinv(1,3);
-    Hy = Hinv(2,1) * (0.5 + xmin) + Hinv(2,2) + (y + 0.5) + Hinv(2,3);
-    Hh = Hinv(3,1) * (0.5 + xmin) + Hinv(3,2) + (y + 0.5) + Hinv(3,3);
+    Hx = Hinv(1,1) * (0.5 + xmin) + Hinv(1,2) * (y + 0.5) + Hinv(1,3);
+    Hy = Hinv(2,1) * (0.5 + xmin) + Hinv(2,2) * (y + 0.5) + Hinv(2,3);
+    Hh = Hinv(3,1) * (0.5 + xmin) + Hinv(3,2) * (y + 0.5) + Hinv(3,3);
 
     for x = xmin:xmax
         %project the pixel center.
         tx = 0; ty = 0;
         
         %divide by homogeneous coordinate
-        tx = Hx/Hh;
-        ty = Hy/Hh;
+        tx = (Hx/Hh);
+        ty = (Hy/Hh);
         
         %if we move x one pixel to the right, here's what
         %happens to our three pre-normalized coordinates.
@@ -176,6 +176,7 @@ Homography = H33_AddCorrespondence( 1,-1,ThisQuad.p(2,1),ThisQuad.p(2,2),Homogra
 Homography = H33_AddCorrespondence( 1, 1,ThisQuad.p(3,1),ThisQuad.p(3,2),Homography);
 Homography = H33_AddCorrespondence(-1, 1,ThisQuad.p(4,1),ThisQuad.p(4,2),Homography);
 
+Homography = H33_Compute(Homography);
 end
 
 function LineSeg = ExtrapolatePts(LineSeg, NumOfPts)
@@ -356,7 +357,6 @@ if(H33_struct.Valid == false)
 end
 x = H33_struct.H(1,1)*Worldx + H33_struct.H(1,2)*Worldy + H33_struct.H(1,3);
 y = H33_struct.H(2,1)*Worldx + H33_struct.H(2,2)*Worldy + H33_struct.H(2,3);
-
 z = H33_struct.H(3,1)*Worldx + H33_struct.H(3,2)*Worldy + H33_struct.H(3,3);
 
 x = (x/z);

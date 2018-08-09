@@ -1,8 +1,8 @@
 function Edge = CalcEdges(Magnitude, Direction, MagThr, height, width)
     MinMag = MagThr;
-    Edge = [];
+    Edge = nan(100000,5);
+    EdgeCnt = 1;
     
-    FirstEntry = true; %Bool to make sure we don't miss the first entry
     for y = 5:height-5
         for x = 5:width-5
             if(Magnitude(y*width+x) > MinMag)
@@ -17,13 +17,8 @@ function Edge = CalcEdges(Magnitude, Direction, MagThr, height, width)
                     IdA  = y*width+x;
                     IdB  = y*width+(x+1);
                     Point = [x+1,y];
-
-                    if(FirstEntry)
-                        Edge = [Cost,IdA,IdB,Point];
-                        FirstEntry = false;
-                    else
-                        Edge = [Edge;Cost,IdA,IdB,Point];
-                    end
+                    Edge(EdgeCnt,:) = [Cost,IdA,IdB,Point];
+                    EdgeCnt = EdgeCnt + 1;
                 end
             end
             %Cost2
@@ -37,13 +32,8 @@ function Edge = CalcEdges(Magnitude, Direction, MagThr, height, width)
                     IdA  = y*width+x;
                     IdB  = (y+1)*width+(x);  
                     Point = [x,y+1];
-                    
-                    if(FirstEntry)
-                        Edge = [Cost,IdA,IdB,Point];
-                        FirstEntry = false;
-                    else
-                        Edge = [Edge;Cost,IdA,IdB,Point];
-                    end
+                    Edge(EdgeCnt,:) = [Cost,IdA,IdB,Point];
+                    EdgeCnt = EdgeCnt + 1;
                 end
             end
             %Cost3
@@ -57,13 +47,8 @@ function Edge = CalcEdges(Magnitude, Direction, MagThr, height, width)
                     IdA  = y*width+x;
                     IdB  = (y+1)*width+(x+1); 
                     Point = [x+1,y+1];
-                    
-                    if(FirstEntry)
-                        Edge = [Cost,IdA,IdB,Point];
-                        FirstEntry = false;
-                    else
-                        Edge = [Edge;Cost,IdA,IdB,Point];
-                    end
+                    Edge(EdgeCnt,:) = [Cost,IdA,IdB,Point];
+                    EdgeCnt = EdgeCnt + 1;
                 end
             end
             %Cost4
@@ -77,18 +62,14 @@ function Edge = CalcEdges(Magnitude, Direction, MagThr, height, width)
                     IdA  = y*width+x;
                     IdB  = (y+1)*width+(x-1);  
                     Point = [x-1,y+1];
-                    
-                    if(FirstEntry)
-                        Edge = [Cost,IdA,IdB,Point];
-                        FirstEntry = false;
-                    else
-                        Edge = [Edge;Cost,IdA,IdB,Point];
-                    end
+                    Edge(EdgeCnt,:) = [Cost,IdA,IdB,Point];
+                    EdgeCnt = EdgeCnt + 1;
                 end
             end
             end
         end
     end
+    Edge(isnan(Edge(:,2)),:) = [];
     Edge = sortrows(Edge,1); %Not needed but helps the merger a little
     %Display found Edges
 %     figure;

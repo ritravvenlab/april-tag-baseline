@@ -196,22 +196,15 @@ function ClusterList = ExportClusters(UF_Array,Magnitude,Edges)
     %Create a logical array for faster indexing / display
     logical_arr = ismember(UF_Array(:,1),Valid_Clusters);
     
-    ClusterList = [];  %Empty matrix for clusters
-    FirstEntry = true; %Bool to make sure we don't miss the first entry
+    ClusterList = zeros(size(Edges,1),4);  %Empty matrix for clusters
     
     for i = 1:size(Edges,1)-1 %loops through all the edges
-        if(logical_arr(Edges(i,2))) %Is the edge a part of valid cluster
-            
-            EdgeCluster = UF_Array(Edges(i,3),1); %Gets cluster #
+        if(~logical_arr(i))
+            EdgeCluster = UF_Array(Edges(i,3)); %Gets cluster #
             EdgeMag = Magnitude(Edges(i,3));      %Gets magnitude
             EdgeX = Edges(i,4);                   %Gets X coord
             EdgeY = Edges(i,5);                   %Gets Y coord
-            if(FirstEntry)
-                ClusterList = [EdgeX,EdgeY,EdgeMag,EdgeCluster];
-                FirstEntry = false;
-            else
-                ClusterList=[ClusterList;EdgeX,EdgeY,EdgeMag,EdgeCluster];
-            end
+            ClusterList(i,:) = [EdgeX,EdgeY,EdgeMag,EdgeCluster];
         end
     end
 

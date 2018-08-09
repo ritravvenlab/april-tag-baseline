@@ -13,8 +13,8 @@ for i = 1:size(quads,1)
     %To keep me sane
     ThisQuad = struct('H33',[],'p',[]);
     
-    ThisQuad.p = [quads(i,1),quads(i,2);quads(i,3),quads(i,4);...
-                quads(i,5),quads(i,6);quads(i,7),quads(i,8)];
+    ThisQuad.p = [quads(i,7),quads(i,8);quads(i,1),quads(i,2);...
+                quads(i,3),quads(i,4);quads(i,5),quads(i,6)];
     
     
     %Initalizing the gray models for this quad
@@ -23,10 +23,6 @@ for i = 1:size(quads,1)
     
     ThisQuad.H33 = H33_Init(ThisQuad);
     ThisQuad.H33 = H33_Compute(ThisQuad.H33);
-    
-    refineSteps = [1, .4, .16, .064];
-    
-    ThisQuad = optimize_quad_generic(tag36h11,GrayImg,ThisQuad,refineSteps);
 
     dd = 2 * blackBorder + dimension; %Find DD
 
@@ -125,7 +121,17 @@ for i = 1:size(quads,1)
     hold off
     end
     if(~bad)
+        
         TagDetection = TF_Decode(tagCode);
+        
+        if(~TagDetection.good)
+            continue;
+        end
+        
+        refineSteps = [1, .4, .16, .064];
+        ThisQuad = optimize_quad_generic(tag36h11,GrayImg,ThisQuad,refineSteps);
+        
+        
         TagDetection.homography = ThisQuad.H33;
         %TagDetection.hxy = Quad_H33.cxy;
 
@@ -140,7 +146,7 @@ for i = 1:size(quads,1)
         TagDetection.homography.H = TagDetection.homography.H * R;
 
         %Should be the bottom left point of the tag
-        [bLx,bLy] = Quad_interpolate01(-1,-1,TagDetection.homography);
+        [bLx,bLy] = Quad_interpolate01(0,0,TagDetection.homography);
         bestRot = -1;
         bestDist = realmax;
                 
@@ -484,16 +490,17 @@ bestCode = uint64(0);
 TagFamily = TagFam36h11();
 
 %Find all the different rotations of this code
-rCodes = uint64(zeros(1,4));
+rCodes = uint64(zeros(1,5));
 rCodes(1) = rCode;
 rCodes(2) = rotate90(rCodes(1),6);
 rCodes(3) = rotate90(rCodes(2),6);
 rCodes(4) = rotate90(rCodes(3),6);
+rCodes(5) = rotate90(rCodes(4),6);
 
 %Search through all the codes and find which ones match the closest to our
 %observation
 for id = 1:size(TagFamily.Codes,2)
-    for rot = 1:4
+    for rot = 1:5
         thisHamming = HammingDistance(rCodes(rot),TagFamily.Codes(id));
         if(thisHamming < bestHamming)
             bestHamming = thisHamming;

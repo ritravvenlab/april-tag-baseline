@@ -6,11 +6,11 @@ for i = 1:size(Detections)
 end
 end
 
-function TagPose = TD_getRelativeTandR(TagSize,Fx,Fy,Px,Py,TD_struct)
+function TagPose = TD_getRelativeTandR(TagSize,Fx,Fy,cx,cy,TD_struct)
 Pose = struct('dist',0,'x',0,'y',0,'z',0,'pitch',0,'roll',0,'yaw',0);
 
-CameraMatrix = [Fx, 0, Px;...
-                0 ,Fy, Py;...
+CameraMatrix = [Fx, 0, cx;...
+                0 ,Fy, cy;...
                 0 , 0,  1];
 
 %Fx = -Fx;
@@ -20,17 +20,17 @@ H = TD_struct.homography.H;
 R20 =  H(3,1);
 R21 =  H(3,2);
 TZ  =  H(3,3);
-R00 = (H(1,1) - Px*R20) / Fx;
-R01 = (H(1,2) - Px*R21) / Fx;
-TX  = (H(1,3) - Px*TZ)  / Fx;
-R10 = (H(2,1) - Py*R20) / Fy;
-R11 = (H(2,2) - Py*R21) / Fy;
-TY  = (H(2,3) - Py*TZ)  / Fy;
+R00 = (H(1,1) - cx*R20) / Fx;
+R01 = (H(1,2) - cx*R21) / Fx;
+TX  = (H(1,3) - cx*TZ)  / Fx;
+R10 = (H(2,1) - cy*R20) / Fy;
+R11 = (H(2,2) - cy*R21) / Fy;
+TY  = (H(2,3) - cy*TZ)  / Fy;
 
 %compute the scale by requiring that the rotation columns are unit length
 %(Use geometric average of the two length vectors we have)
-length1 = sqrt(R00^2 + R10^2 + R20^2);
-length2 = sqrt(R01^2 + R11^2 + R21^2);
+length1 = sqrt(R00*R00 + R10*R10 + R20*R20);
+length2 = sqrt(R01*R01 + R11*R11 + R21*R21);
 s = 1/(sqrt(length1 * length2));
 
 %get sign of S by requiring the tag to be in front the camera;
@@ -56,21 +56,23 @@ R12 = R20 * R01 - R00*R21;
 R22 = R00 * R11 - R10*R01;
 
 %Improve rotation matrix by applying polar decomposition.
-R = [R00,R01,R02;R10,R11,R12;R20,R21,R22];
+R = [R00,R01,R02;...
+     R10,R11,R12;...
+     R20,R21,R22];
 
 [U,~,V] = svd(R);
 
 R = U * V';
 
-R00 = R(1,1);
-R01 = R(1,2);
-R02 = R(1,3);
-R10 = R(2,1);
-R11 = R(2,2);
-R12 = R(2,3);
-R20 = R(3,1);
-R21 = R(3,2);
-R22 = R(3,3);
+% R00 = R(1,1);
+% R01 = R(1,2);
+% R02 = R(1,3);
+% R10 = R(2,1);
+% R11 = R(2,2);
+% R12 = R(2,3);
+% R20 = R(3,1);
+% R21 = R(3,2);
+%R22 = R(3,3);
 %End of polar decomposition
 
 %Attempting to account for scale of tag
@@ -80,9 +82,6 @@ TY  = TY * scale;
 TZ  = TZ * scale;
 
 %Finished Rotation and translation matrix
-RT = [R00,R01,R02,TX;R10,R11,R12,TY;R20,R21,R22,TZ;0,0,0,1];
-R = [R00,R01,R02;R10,R11,R12;R20,R21,R22];
-
 RotationFix = [1,0,0;0,-1,0;0,0,1];
 FrameFix = [0,0,1;-1,0,0;0,0,-1];
 %R = R * FrameFix;
