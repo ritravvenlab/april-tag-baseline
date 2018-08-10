@@ -18,7 +18,7 @@ imageData is from using the [imread](https://www.mathworks.com/help/matlab/ref/i
 
 alg determines which algorithm is used. When alg = 1 then the Apriltags 1 algorithm is used otherwise the AprilTags 2 algorithm is used.
 
-Examples of the AprilTag function being used can be seen in [matlab_code.m](src/matlab_code.m).
+Examples of the AprilTag function being used can be seen in [Example_Code.m](Examples/Example_Code.m).
 
 ## Acknowledgements
 This is a port of the AprilTag library here's the links to the original code

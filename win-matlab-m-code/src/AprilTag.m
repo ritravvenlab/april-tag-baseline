@@ -1,5 +1,5 @@
 function [Pose, Detections] = AprilTag(image,alg,debug)
-addpath('gradient_src','threshold_src','common_src');
+%addpath('gradient_src','threshold_src','common_src');
 Pose = []; Detections = [];
 if(nargin < 3)
     debug = 0;
@@ -8,6 +8,8 @@ end
 if(nargin < 2)
     alg = 2;
 end
+
+h = waitbar(0,'Initalizing Apriltags');
 
 % if(debug == 1)
 %     figure('Name','Original Image');
@@ -54,13 +56,14 @@ title('Stage 1:Gaussian Blurring');
 end
 
 if(alg == 1)
-    quads = quad_gradient(image_blurred,image_gray,debug);
+    quads = quad_gradient(image_blurred,image_gray,debug,h);
 else
-    quads = quad_thresh(image_blurred,image_gray,debug);
+    quads = quad_thresh(image_blurred,image_gray,debug,h);
 end
 
 %Stage 8: Decode Quads
 Detections = DecodeQuad(quads,image_gray,0);
+waitbar(4/5,h,'Finished Quad Decoding');
 
 %Stage 9: Remove Duplicates (Skipping For Now)
 %This part checks if the quad points are on top of eachother and then picks
@@ -68,6 +71,7 @@ Detections = DecodeQuad(quads,image_gray,0);
 
 %Stage 10?: Decode Pose From Detections
 Pose = PoseDecoding(Detections,TagSize,Fx,Fy,Px,Py);
+waitbar(5/5,h,'Finished Quad Decoding');
 
 % if(debug == 1)
 % sprintf('I found %i tag(s)\n',size(Detections,1))
