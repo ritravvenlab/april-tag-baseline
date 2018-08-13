@@ -2,7 +2,7 @@ clc;
 clear;
 close all;
 
-addpath('../src');
+addpath(genpath('../src'))
 
 user_input_prompt = 'Which example do you want to run?\n1.Webcam\n2.Test Image\n3.Single Image\n';
 usr_input = input(user_input_prompt);
